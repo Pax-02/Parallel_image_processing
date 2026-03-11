@@ -18,4 +18,4 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 
 ##### Convert JPG to PGM command
 
-    magick image.jpg image.pgm
+    magick image.jpg -compress none image.pgm
