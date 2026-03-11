@@ -19,3 +19,11 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 ##### Convert JPG to PGM command
 
     magick image.jpg -compress none image.pgm
+
+## Second Step
+
+Compile and Run
+
+    gcc src/serial_baseline.c -o serial_baseline
+
+    ./serial_baseline
