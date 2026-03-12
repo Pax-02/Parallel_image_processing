@@ -252,7 +252,7 @@ int main (){
 
     copy_image(&input, &output);
 
-    guassian_blur(&input, &output);
+     // guassian_blur(&input, &output); seg faults at (128,83)
 
     if (!save_pgm("output/result1.pgm", &output)) {
         printf("Failed to save image.\n");
