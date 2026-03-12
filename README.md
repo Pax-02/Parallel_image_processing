@@ -27,3 +27,7 @@ Compile and Run
     gcc src/serial_baseline.c -o serial_baseline
 
     ./serial_baseline
+
+### Github Link :
+
+    https://github.com/Pax-02/Parallel_image_processing.git
