@@ -222,9 +222,9 @@ int main (){
 
     copy_image(&input, &output);
 
-    clock_gettime(CLOCK_MONOTONIC_RAW,&start);
+    clock_gettime(CLOCK_MONOTONIC,&start);
     gaussian_blur(&input, &output);
-    clock_gettime(CLOCK_MONOTONIC_RAW,&end);
+    clock_gettime(CLOCK_MONOTONIC,&end);
     printf("Gaussian Blur Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
 
 
