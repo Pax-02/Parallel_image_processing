@@ -112,9 +112,7 @@ void guassian_blur(Image *img, Image *buf){
 
     int i;
     int index;
-    double averageR = 0;
-    double averageG = 0;
-    double averageB = 0;
+    double average = 0;
 
     //create guassian distribution matrix
     double *guassianDist = (double*)malloc(sizeof(double)*9);
@@ -125,109 +123,79 @@ void guassian_blur(Image *img, Image *buf){
     //apply filter to input image
     for(int y=0; y<img->height; y++){
         for(int x=0; x<img->width; x++){
-            index = (y*img->width+x)*3;
+            index = (y*img->width+x);
             i = 0;
-            averageR = 0;
-            averageG = 0;
-            averageB = 0;
+            average = 0;
 
-            printf("x: %d y: %d\n", x, y);
 
             //Blurring pixels in the corners
             if(y==0&&x==0){
-                buf->data[index] = ((img->data[index]*4)+(img->data[index+3]*2)+(img->data[index+img->width]*2)+(img->data[index+img->width+3]))/9;
-                buf->data[index+1] = ((img->data[index+1]*4)+(img->data[index+1+3]*2)+(img->data[index+1+img->width]*2)+(img->data[index+1+img->width+3]))/9;
-                buf->data[index+2] = ((img->data[index+2]*4)+(img->data[index+2+3]*2)+(img->data[index+2+img->width]*2)+(img->data[index+2+img->width+3]))/9;
+                buf->data[index] = ((img->data[index]*4)+(img->data[index+1]*2)+(img->data[index+img->width]*2)+(img->data[index+img->width+1]))/9;
             }
             else if(y==0&&x==img->width-1){
-                buf->data[index] = ((img->data[index]*4)+(img->data[index-3]*2)+(img->data[index+img->width]*2)+(img->data[index+img->width-3]))/9;
-                buf->data[index+1] = ((img->data[index+1]*4)+(img->data[index+1-3]*2)+(img->data[index+1+img->width]*2)+(img->data[index+1+img->width-3]))/9;
-                buf->data[index+2] = ((img->data[index+2]*4)+(img->data[index+2-3]*2)+(img->data[index+2+img->width]*2)+(img->data[index+2+img->width-3]))/9;
+                buf->data[index] = ((img->data[index]*4)+(img->data[index-1]*2)+(img->data[index+img->width]*2)+(img->data[index+img->width-1]))/9;
             }
             else if(y==img->width-1&&x==0){
-                buf->data[index] = ((img->data[index]*4)+(img->data[index+3]*2)+(img->data[index-img->width]*2)+(img->data[index-img->width+3]))/9;
-                buf->data[index+1] = ((img->data[index+1]*4)+(img->data[index+1+3]*2)+(img->data[index+1-img->width]*2)+(img->data[index+1-img->width+3]))/9;
-                buf->data[index+2] = ((img->data[index+2]*4)+(img->data[index+2+3]*2)+(img->data[index+2-img->width]*2)+(img->data[index+2-img->width+3]))/9;
+                buf->data[index] = ((img->data[index]*4)+(img->data[index+1]*2)+(img->data[index-img->width]*2)+(img->data[index-img->width+1]))/9;
             }
             else if(y==img->width-1&&x==img->width-1){
-                buf->data[index] = ((img->data[index]*4)+(img->data[index-3]*2)+(img->data[index-img->width]*2)+(img->data[index-img->width-3]))/9;
-                buf->data[index+1] = ((img->data[index+1]*4)+(img->data[index+1-3]*2)+(img->data[index+1-img->width]*2)+(img->data[index+1-img->width-3]))/9;
-                buf->data[index+2] = ((img->data[index+2]*4)+(img->data[index+2-3]*2)+(img->data[index+2-img->width]*2)+(img->data[index+2-img->width-3]))/9;
+                buf->data[index] = ((img->data[index]*4)+(img->data[index-1]*2)+(img->data[index-img->width]*2)+(img->data[index-img->width-1]))/9;
             }
             //Blurring pixels on the edges
             else if(y==0){
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
                         if(i>=3){
-                            averageR = averageR + (img->data[(index+y*img->width+x)*3]*guassianDist[i]);
-                            averageG = averageG + (img->data[(index+1+y*img->width+x)*3]*guassianDist[i]);
-                            averageB = averageB + (img->data[(index+2+y*img->width+x)*3]*guassianDist[i]);
+                            average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
+
                         }
                         i++;
                     }
                 }
-                buf->data[index] = averageR/12;
-                buf->data[index+1] = averageG/12;
-                buf->data[index+2] = averageB/12;
+                buf->data[index] = average/12;
             }
             else if(y==img->height-1){
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
                         if(i<6){
-                            averageR = averageR + (img->data[(index+y*img->width+x)*3]*guassianDist[i]);
-                            averageG = averageG + (img->data[(index+1+y*img->width+x)*3]*guassianDist[i]);
-                            averageB = averageB + (img->data[(index+2+y*img->width+x)*3]*guassianDist[i]);
+                            average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
                         }
                         i++;
                     }
                 }
-                buf->data[index] = averageR/12;
-                buf->data[index+1] = averageG/12;
-                buf->data[index+2] = averageB/12;
+                buf->data[index] = average/12;
             }
             else if(x==0){
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
                         if((i%3)!=0){
-                            averageR = averageR + (img->data[(index+y*img->width+x)*3]*guassianDist[i]);
-                            averageG = averageG + (img->data[(index+1+y*img->width+x)*3]*guassianDist[i]);
-                            averageB = averageB + (img->data[(index+2+y*img->width+x)*3]*guassianDist[i]);
+                            average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
                         }
                         i++;
                     }
                 }
-                buf->data[index] = averageR/12;
-                buf->data[index+1] = averageG/12;
-                buf->data[index+2] = averageB/12;
+                buf->data[index] = average/12;
             }
             else if(x==img->width-1){
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
                         if((i%3)!=2){
-                            averageR = averageR + (img->data[(index+y*img->width+x)*3]*guassianDist[i]);
-                            averageG = averageG + (img->data[(index+1+y*img->width+x)*3]*guassianDist[i]);
-                            averageB = averageB + (img->data[(index+2+y*img->width+x)*3]*guassianDist[i]);
+                            average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
                         }
                         i++;
                     }
                 }
-                buf->data[index] = averageR/12;
-                buf->data[index+1] = averageG/12;
-                buf->data[index+2] = averageB/12;
+                buf->data[index] = average/12;
             }
             //Blurring pixels in the middle
             else{
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
-                        averageR = averageR + (img->data[(index+y*img->width+x)*3]*guassianDist[i]);
-                        averageG = averageG + (img->data[(index+1+y*img->width+x)*3]*guassianDist[i]);
-                        averageB = averageB + (img->data[(index+2+y*img->width+x)*3]*guassianDist[i]);
+                        average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
                         i++;
                     }
                 }
-                buf->data[index] = averageR/16;
-                buf->data[index+1] = averageG/16;
-                buf->data[index+2] = averageB/16;
+                buf->data[index] = average/16;
             }
         }
     }
@@ -252,7 +220,7 @@ int main (){
 
     copy_image(&input, &output);
 
-     // guassian_blur(&input, &output); seg faults at (128,83)
+    guassian_blur(&input, &output);
 
     if (!save_pgm("output/result1.pgm", &output)) {
         printf("Failed to save image.\n");
