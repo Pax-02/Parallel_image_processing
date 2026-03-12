@@ -1,7 +1,8 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <time.h>
 
 //define the structure
 typedef struct {
@@ -93,7 +94,7 @@ int save_pgm(const char *filename, const Image *img){
     return 1;
 }
 
-//Copy image fuction to test app // to be deleted
+//Copy image fuction to use as buffer
 
 void copy_image(const Image *input, Image *output) {
     output->width = input->width;
@@ -108,17 +109,17 @@ void copy_image(const Image *input, Image *output) {
 
 // Apply the Guassian Blur Filter
 
-void guassian_blur(Image *img, Image *buf){
+void gaussian_blur(Image *img, Image *buf){
 
     int i;
     int index;
     double average = 0;
 
     //create guassian distribution matrix
-    double *guassianDist = (double*)malloc(sizeof(double)*9);
-    guassianDist[0]=1,guassianDist[2]=1,guassianDist[6]=1,guassianDist[8]=1;
-    guassianDist[1]=2,guassianDist[3]=2,guassianDist[5]=2,guassianDist[7]=2;
-    guassianDist[4]=4;
+    double *gaussianDist = (double*)malloc(sizeof(double)*9);
+    gaussianDist[0]=1,gaussianDist[2]=1,gaussianDist[6]=1,gaussianDist[8]=1;
+    gaussianDist[1]=2,gaussianDist[3]=2,gaussianDist[5]=2,gaussianDist[7]=2;
+    gaussianDist[4]=4;
 
     //apply filter to input image
     for(int y=0; y<img->height; y++){
@@ -135,10 +136,10 @@ void guassian_blur(Image *img, Image *buf){
             else if(y==0&&x==img->width-1){
                 buf->data[index] = ((img->data[index]*4)+(img->data[index-1]*2)+(img->data[index+img->width]*2)+(img->data[index+img->width-1]))/9;
             }
-            else if(y==img->width-1&&x==0){
+            else if(y==img->height-1&&x==0){
                 buf->data[index] = ((img->data[index]*4)+(img->data[index+1]*2)+(img->data[index-img->width]*2)+(img->data[index-img->width+1]))/9;
             }
-            else if(y==img->width-1&&x==img->width-1){
+            else if(y==img->height-1&&x==img->width-1){
                 buf->data[index] = ((img->data[index]*4)+(img->data[index-1]*2)+(img->data[index-img->width]*2)+(img->data[index-img->width-1]))/9;
             }
             //Blurring pixels on the edges
@@ -146,7 +147,7 @@ void guassian_blur(Image *img, Image *buf){
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
                         if(i>=3){
-                            average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
+                            average = average + (img->data[(index+y2*img->width+x2)]*gaussianDist[i]);
 
                         }
                         i++;
@@ -158,7 +159,7 @@ void guassian_blur(Image *img, Image *buf){
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
                         if(i<6){
-                            average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
+                            average = average + (img->data[(index+y2*img->width+x2)]*gaussianDist[i]);
                         }
                         i++;
                     }
@@ -169,7 +170,7 @@ void guassian_blur(Image *img, Image *buf){
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
                         if((i%3)!=0){
-                            average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
+                            average = average + (img->data[(index+y2*img->width+x2)]*gaussianDist[i]);
                         }
                         i++;
                     }
@@ -180,7 +181,7 @@ void guassian_blur(Image *img, Image *buf){
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
                         if((i%3)!=2){
-                            average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
+                            average = average + (img->data[(index+y2*img->width+x2)]*gaussianDist[i]);
                         }
                         i++;
                     }
@@ -191,7 +192,7 @@ void guassian_blur(Image *img, Image *buf){
             else{
                 for(int y2=-1; y2<=1; y2++){
                     for(int x2=-1; x2<=1; x2++){
-                        average = average + (img->data[(index+y*img->width+x)]*guassianDist[i]);
+                        average = average + (img->data[(index+y2*img->width+x2)]*gaussianDist[i]);
                         i++;
                     }
                 }
@@ -199,7 +200,7 @@ void guassian_blur(Image *img, Image *buf){
             }
         }
     }
-    free(guassianDist);
+    free(gaussianDist);
 }
 
 //clear the memory (image)
@@ -211,6 +212,7 @@ void free_image(Image *img) {
 int main (){
     Image input = {0};
     Image output = {0};
+    struct timespec start, end;
 
     //load the image
     if (!load_pgm("input/test1.pgm",&input)){
@@ -220,7 +222,11 @@ int main (){
 
     copy_image(&input, &output);
 
-    guassian_blur(&input, &output);
+    clock_gettime(CLOCK_MONOTONIC_RAW,&start);
+    gaussian_blur(&input, &output);
+    clock_gettime(CLOCK_MONOTONIC_RAW,&end);
+    printf("Gaussian Blur Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
+
 
     if (!save_pgm("output/result1.pgm", &output)) {
         printf("Failed to save image.\n");
