@@ -24,7 +24,7 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 
 Compile and Run
 
-    gcc src/serial_baseline.c -o serial_baseline
+    gcc src/serial_baseline.c -o serial_baseline -lm
 
     ./serial_baseline
 

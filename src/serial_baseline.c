@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 //define the structure
 typedef struct {
@@ -116,10 +117,7 @@ void gaussian_blur(Image *img, Image *buf){
     double average = 0;
 
     //create guassian distribution matrix
-    double *gaussianDist = (double*)malloc(sizeof(double)*9);
-    gaussianDist[0]=1,gaussianDist[2]=1,gaussianDist[6]=1,gaussianDist[8]=1;
-    gaussianDist[1]=2,gaussianDist[3]=2,gaussianDist[5]=2,gaussianDist[7]=2;
-    gaussianDist[4]=4;
+    double gaussianDist[] = {1,2,1,2,4,2,1,2,1};
 
     //apply filter to input image
     for(int y=0; y<img->height; y++){
@@ -200,7 +198,103 @@ void gaussian_blur(Image *img, Image *buf){
             }
         }
     }
-    free(gaussianDist);
+}
+
+void sobel(Image *img, Image *buf){
+
+    int i;
+    int index;
+    double averagex = 0;
+    double averagey = 0;
+
+    //create x and y matricies
+    double matrixx[] = {-1,0,1,-2,0,2,-1,0,1};
+    double matrixy[] = {1,2,1,0,0,0,-1,-2,-1};
+
+    //apply filter to input image
+    for(int y=0; y<img->height; y++){
+        for(int x=0; x<img->width; x++){
+            index = (y*img->width+x);
+            i = 0;
+            averagex = 0;
+            averagey = 0;
+
+            //Applying to pixels in the corners
+            if(y==0&&x==0){
+                averagex = ((img->data[index]*0)+(img->data[index+1]*2)+(img->data[index+img->width]*0)+(img->data[index+img->width+1*1]));
+                averagey = ((img->data[index]*0)+(img->data[index+1]*0)+(img->data[index+img->width]*-2)+(img->data[index+img->width+1*-1]));
+            }
+            else if(y==0&&x==img->width-1){
+                averagex = ((img->data[index]*0)+(img->data[index-1]*-2)+(img->data[index+img->width]*0)+(img->data[index+img->width-1*-1]));
+                averagey = ((img->data[index]*0)+(img->data[index-1]*0)+(img->data[index+img->width]*-2)+(img->data[index+img->width-1*-1]));
+            }
+            else if(y==img->height-1&&x==0){
+                averagex = ((img->data[index]*0)+(img->data[index+1]*2)+(img->data[index-img->width]*0)+(img->data[index-img->width+1*1]));
+                averagey = ((img->data[index]*0)+(img->data[index+1]*0)+(img->data[index-img->width]*2)+(img->data[index-img->width+1*1]));
+            }
+            else if(y==img->height-1&&x==img->width-1){
+                averagex = ((img->data[index]*0)+(img->data[index-1]*-2)+(img->data[index-img->width]*0)+(img->data[index-img->width-1*-1]));
+                averagey = ((img->data[index]*0)+(img->data[index-1]*0)+(img->data[index-img->width]*2)+(img->data[index-img->width-1*1]));
+            }
+            //Applying to pixels on the edges
+            else if(y==0){
+                for(int y2=-1; y2<=1; y2++){
+                    for(int x2=-1; x2<=1; x2++){
+                        if(i>=3){
+                            averagex = averagex + (img->data[(index+y2*img->width+x2)]*matrixx[i]);
+                            averagey = averagey + (img->data[(index+y2*img->width+x2)]*matrixy[i]);
+
+                        }
+                        i++;
+                    }
+                }
+            }
+            else if(y==img->height-1){
+                for(int y2=-1; y2<=1; y2++){
+                    for(int x2=-1; x2<=1; x2++){
+                        if(i<6){
+                            averagex = averagex + (img->data[(index+y2*img->width+x2)]*matrixx[i]);
+                            averagey = averagey + (img->data[(index+y2*img->width+x2)]*matrixy[i]);
+                        }
+                        i++;
+                    }
+                }
+            }
+            else if(x==0){
+                for(int y2=-1; y2<=1; y2++){
+                    for(int x2=-1; x2<=1; x2++){
+                        if((i%3)!=0){
+                            averagex = averagex + (img->data[(index+y2*img->width+x2)]*matrixx[i]);
+                            averagey = averagey + (img->data[(index+y2*img->width+x2)]*matrixy[i]);
+                        }
+                        i++;
+                    }
+                }
+            }
+            else if(x==img->width-1){
+                for(int y2=-1; y2<=1; y2++){
+                    for(int x2=-1; x2<=1; x2++){
+                        if((i%3)!=2){
+                            averagex = averagex + (img->data[(index+y2*img->width+x2)]*matrixx[i]);
+                            averagey = averagey + (img->data[(index+y2*img->width+x2)]*matrixy[i]);
+                        }
+                        i++;
+                    }
+                }
+            }
+            //Applying to pixels in the middle
+            else{
+                for(int y2=-1; y2<=1; y2++){
+                    for(int x2=-1; x2<=1; x2++){
+                        averagex = averagex + (img->data[(index+y2*img->width+x2)]*matrixx[i]);
+                        averagey = averagey + (img->data[(index+y2*img->width+x2)]*matrixy[i]);
+                        i++;
+                    }
+                }
+            }
+            buf->data[index] = sqrt((averagex*averagex)+(averagey*averagey));
+        }
+    }
 }
 
 //clear the memory (image)
@@ -227,6 +321,13 @@ int main (){
     clock_gettime(CLOCK_MONOTONIC,&end);
     printf("Gaussian Blur Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
 
+    //setting the blurred image as the input
+    copy_image(&output, &input);
+
+    clock_gettime(CLOCK_MONOTONIC,&start);
+    sobel(&input, &output);
+    clock_gettime(CLOCK_MONOTONIC,&end);
+    printf("Sobel Edge Detection Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
 
     if (!save_pgm("output/result1.pgm", &output)) {
         printf("Failed to save image.\n");
