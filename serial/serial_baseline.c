@@ -200,6 +200,50 @@ void gaussian_blur(Image *img, Image *buf){
     }
 }
 
+//sorting function to be used in median (sorts the array in ascending order)
+void sort_pixels(unsigned char arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[i]) {
+                unsigned char temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+}
+
+void median_filter(Image *img, Image *buf) {
+    //Loop through every pixel in the image
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+
+            //Hold the neighboring pixel values
+            unsigned char window[9];
+            int count = 0;
+
+            //collect all valid neighbors in the 3x3 area
+            for (int y2 = -1; y2 <= 1; y2++) {
+                for (int x2 = -1; x2 <= 1; x2++) {
+                    int ny = y + y2;
+                    int nx = x + x2;
+                    //only use pixels that are inside the image (Look out of the edges)
+                    if (ny >= 0 && ny < img->height && nx >= 0 && nx < img->width) {
+                        window[count] = img->data[ny * img->width + nx];
+                        count++;
+                    }
+                }
+            }
+
+            //sort the collected pixel values
+            sort_pixels(window, count);
+
+            //pick the middle value after sorting and exchange it with the noise one
+            buf->data[y * img->width + x] = window[count / 2];
+        }
+    }
+}
+
 void sobel(Image *img, Image *buf){
 
     int i;
@@ -328,6 +372,21 @@ int main (){
         return 1;
     }
     //setting the blurred image as the input
+    copy_image(&output, &input);
+
+    clock_gettime(CLOCK_MONOTONIC,&start);
+    median_filter(&input, &output);
+    clock_gettime(CLOCK_MONOTONIC,&end);
+    printf("Median Filter Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
+
+    // Store the median image 
+    if (!save_pgm("images/small/result/serial/median.pgm", &output)) {
+        printf("Failed to save median filter image.\n");
+        free_image(&input);
+        free_image(&output);
+        return 1;
+    }
+    //set median image as the new input
     copy_image(&output, &input);
 
     clock_gettime(CLOCK_MONOTONIC,&start);
