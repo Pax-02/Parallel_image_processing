@@ -309,7 +309,7 @@ int main (){
     struct timespec start, end;
 
     //load the image
-    if (!load_pgm("input/test1.pgm",&input)){
+    if (!load_pgm("images/small/starter/source.pgm",&input)){
         printf("Couldn't load the image\n");
         return 1;
     }
@@ -320,7 +320,13 @@ int main (){
     gaussian_blur(&input, &output);
     clock_gettime(CLOCK_MONOTONIC,&end);
     printf("Gaussian Blur Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
-
+    //store the gausian image 
+    if (!save_pgm("images/small/result/serial/gaussian.pgm", &output)) {
+        printf("Failed to save gaussian blur image.\n");
+        free_image(&input);
+        free_image(&output);
+        return 1;
+    }
     //setting the blurred image as the input
     copy_image(&output, &input);
 
@@ -329,7 +335,7 @@ int main (){
     clock_gettime(CLOCK_MONOTONIC,&end);
     printf("Sobel Edge Detection Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
 
-    if (!save_pgm("output/result1.pgm", &output)) {
+    if (!save_pgm("images/small/result/serial/sobel.pgm", &output)) {
         printf("Failed to save image.\n");
         free_image(&input);
         free_image(&output);

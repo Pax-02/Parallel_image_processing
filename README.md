@@ -24,10 +24,12 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 
 Compile and Run
 
-    gcc src/serial_baseline.c -o serial_baseline -lm
+    gcc serial/serial_baseline.c -o serial/serial_baseline -lm
 
-    ./serial_baseline
+    ./serial/serial_baseline
 
 ### Github Link :
 
     https://github.com/Pax-02/Parallel_image_processing.git
+
+###
