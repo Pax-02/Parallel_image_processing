@@ -32,4 +32,13 @@ Compile and Run
 
     https://github.com/Pax-02/Parallel_image_processing.git
 
-###
+### Compile and RUN the OPENMP version
+
+    gcc -fopenmp openmp/openMP.c -o openMP/openMP -lm
+
+#### Run on Different Threads
+
+    OMP_NUM_THREADS=1 ./openMP/openMP
+    OMP_NUM_THREADS=2 ./openMP/openMP
+    OMP_NUM_THREADS=4 ./openMP/openMP
+    OMP_NUM_THREADS=8 ./openMP/openMP
