@@ -107,6 +107,26 @@ void copy_image(const Image *input, Image *output) {
         output->data[i] = input->data[i];
     }
 }
+//Initialize and allocate memory for the image (output) <<to help not to use copy_image that had to always allocate memory
+void init_image_like(const Image *src, Image *dst) {
+    dst->width = src->width;
+    dst->height = src->height;
+    dst->max_value = src->max_value;
+    dst->data = (unsigned char *)malloc(src->width * src->height);
+
+    if (!dst->data) {
+        printf("Memory allocation failed.\n");
+        exit(1);
+    }
+}
+
+//Swap the data pointers instead of looping to copy
+void swap_image_data(Image *a, Image *b) {
+    unsigned char *tmp = a->data;
+    a->data = b->data;
+    b->data = tmp;
+}
+
 
 // Apply the Gaussian Blur Filter
 void gaussian_blur(Image *img, Image *buf){
@@ -355,10 +375,11 @@ int main (){
         return 1;
     }
 
+    //allocate output once, same size as input
+    init_image_like(&input, &output);
+
     #pragma omp parallel default(none) shared(input, output, start, end)
     {
-        //make output the same size as input
-        copy_image(&input, &output);
 
         //Gaussian Blur
         #pragma omp single
@@ -375,10 +396,9 @@ int main (){
             if (!save_pgm("images/small/result/openmp/gaussian.pgm", &output)) {
                 printf("Failed to save gaussian blur image.\n");
             }
+             //next stage read the gaussian result as input
+            swap_image_data(&input, &output);
         }
-
-        //use gaussian result as next input
-        copy_image(&output, &input);
 
         //Median Filter
         #pragma omp single
@@ -395,10 +415,9 @@ int main (){
             if (!save_pgm("images/small/result/openmp/median.pgm", &output)) {
                 printf("Failed to save median filter image.\n");
             }
+            //next stage read the median result as input
+            swap_image_data(&input, &output);
         }
-
-        //use median result as next input
-        copy_image(&output, &input);
 
         //Sobel
         #pragma omp single
