@@ -45,4 +45,4 @@ Compile and Run
 
 ### Compile and RUN the MPI version
     mpicc MPI/MPI.c -o MPI/MPI -lm
-    mpirun -np [numberOfThreads] ./MPI/MPI
+    mpirun -np [numberOfProcesses] ./MPI/MPI
