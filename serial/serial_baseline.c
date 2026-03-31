@@ -107,6 +107,24 @@ void copy_image(const Image *input, Image *output) {
         output->data[i] = input->data[i];
     }
 }
+// Allocate memory for output
+void init_image_like(const Image *src, Image *dst) {
+    dst->width = src->width;
+    dst->height = src->height;
+    dst->max_value = src->max_value;
+    dst->data = (unsigned char *)malloc(src->width * src->height);
+
+    if (!dst->data) {
+        printf("Memory allocation failed.\n");
+        exit(1);
+    }
+}
+//swap buffers to copy data instead of loop
+void swap_image_data(Image *a, Image *b) {
+    unsigned char *tmp = a->data;
+    a->data = b->data;
+    b->data = tmp;
+}
 
 // Apply the Guassian Blur Filter
 
@@ -358,7 +376,9 @@ int main (){
         return 1;
     }
 
-    copy_image(&input, &output);
+    //allocate output once with same size as input
+    init_image_like(&input, &output);
+
 
     clock_gettime(CLOCK_MONOTONIC,&start);
     gaussian_blur(&input, &output);
@@ -372,7 +392,7 @@ int main (){
         return 1;
     }
     //setting the blurred image as the input
-    copy_image(&output, &input);
+    swap_image_data(&input, &output);
 
     clock_gettime(CLOCK_MONOTONIC,&start);
     median_filter(&input, &output);
@@ -387,7 +407,7 @@ int main (){
         return 1;
     }
     //set median image as the new input
-    copy_image(&output, &input);
+    swap_image_data(&input, &output);
 
     clock_gettime(CLOCK_MONOTONIC,&start);
     sobel(&input, &output);
