@@ -42,3 +42,7 @@ Compile and Run
     OMP_NUM_THREADS=2 ./openMP/openMP
     OMP_NUM_THREADS=4 ./openMP/openMP
     OMP_NUM_THREADS=8 ./openMP/openMP
+
+### Compile and RUN the MPI version
+    mpicc MPI/MPI.c -o MPI/MPI -lm
+    mpirun -np [numberOfThreads] ./MPI/MPI
