@@ -389,7 +389,7 @@ int main(int argc, char *argv[]){
     char sobel_path[256];
 
     snprintf(input_path, sizeof(input_path),
-             "images/%s/starter/source.pgm", image_size);
+             "images/%s/result/starter/%s.pgm", image_size, image_size);
 
     snprintf(gaussian_path, sizeof(gaussian_path),
              "images/%s/result/openmp/gaussian.pgm", image_size);
@@ -410,8 +410,9 @@ int main(int argc, char *argv[]){
     init_image_like(&input, &output);
 
     #pragma omp parallel default(none) shared(input, output, start, end, image_size, input_path, gaussian_path, median_path, sobel_path)
-    {
-
+    {   
+        double totalTime = 0;
+        
         //Gaussian Blur
         #pragma omp single
         clock_gettime(CLOCK_MONOTONIC, &start);
@@ -423,7 +424,7 @@ int main(int argc, char *argv[]){
             clock_gettime(CLOCK_MONOTONIC, &end);
             printf("Gaussian Blur Time: %.10lfs\n",
                    (end.tv_sec-start.tv_sec) + (end.tv_nsec-start.tv_nsec)/1000000000.0);
-
+            totalTime = totalTime+(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0;
             if (!save_pgm(gaussian_path, &output)) {
                 printf("Failed to save gaussian blur image.\n");
             }
@@ -442,7 +443,7 @@ int main(int argc, char *argv[]){
             clock_gettime(CLOCK_MONOTONIC, &end);
             printf("Median Filter Time: %.10lfs\n",
                    (end.tv_sec-start.tv_sec) + (end.tv_nsec-start.tv_nsec)/1000000000.0);
-
+            totalTime = totalTime+(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0;
             if (!save_pgm(median_path, &output)) {
                 printf("Failed to save median filter image.\n");
             }
@@ -461,10 +462,11 @@ int main(int argc, char *argv[]){
             clock_gettime(CLOCK_MONOTONIC, &end);
             printf("Sobel Edge Detection Time: %.10lfs\n",
                    (end.tv_sec-start.tv_sec) + (end.tv_nsec-start.tv_nsec)/1000000000.0);
-
+            totalTime = totalTime+(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0;
             if (!save_pgm(sobel_path, &output)) {
                 printf("Failed to save image.\n");
             }
+            printf("Total Time Taken: %.10lfs\n", totalTime);
         }
     }
 

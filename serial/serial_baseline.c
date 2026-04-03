@@ -369,6 +369,7 @@ int main (int argc, char *argv[]){
     Image input = {0};
     Image output = {0};
     struct timespec start, end;
+    double totalTime = 0;
 
     const char *image_size = "small";
 
@@ -390,7 +391,7 @@ int main (int argc, char *argv[]){
     char sobel_path[256];
 
     snprintf(input_path, sizeof(input_path),
-             "images/%s/starter/source.pgm", image_size);
+             "images/%s/result/starter/%s.pgm", image_size, image_size);
 
     snprintf(gaussian_path, sizeof(gaussian_path),
              "images/%s/result/serial/gaussian.pgm", image_size);
@@ -415,6 +416,7 @@ int main (int argc, char *argv[]){
     gaussian_blur(&input, &output);
     clock_gettime(CLOCK_MONOTONIC,&end);
     printf("Gaussian Blur Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
+    totalTime = totalTime+(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0;
     //store the gausian image 
     if (!save_pgm(gaussian_path, &output)) {
         printf("Failed to save gaussian blur image.\n");
@@ -429,7 +431,7 @@ int main (int argc, char *argv[]){
     median_filter(&input, &output);
     clock_gettime(CLOCK_MONOTONIC,&end);
     printf("Median Filter Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
-
+    totalTime = totalTime+(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0;
     // Store the median image 
     if (!save_pgm(median_path, &output)) {
         printf("Failed to save median filter image.\n");
@@ -444,13 +446,14 @@ int main (int argc, char *argv[]){
     sobel(&input, &output);
     clock_gettime(CLOCK_MONOTONIC,&end);
     printf("Sobel Edge Detection Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
-
+    totalTime = totalTime+(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0;
     if (!save_pgm(sobel_path, &output)) {
         printf("Failed to save image.\n");
         free_image(&input);
         free_image(&output);
         return 1;
     }
+    printf("Total Time Taken: %.10lfs\n", totalTime);
 
     free_image(&input);
     free_image(&output);

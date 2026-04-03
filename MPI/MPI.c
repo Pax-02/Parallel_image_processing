@@ -522,6 +522,7 @@ int main (int argc, char** argv){
     MPI_Init(&argc, &argv);
     int rank, size;
     double start, end;
+    double totalTime = 0;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -550,7 +551,7 @@ int main (int argc, char** argv){
     char sobel_path[256];
 
     snprintf(input_path, sizeof(input_path),
-             "images/%s/starter/source.pgm", image_size);
+             "images/%s/result/starter/%s.pgm", image_size, image_size);
 
     snprintf(gaussian_path, sizeof(gaussian_path),
              "images/%s/result/mpi/gaussian.pgm", image_size);
@@ -588,8 +589,8 @@ int main (int argc, char** argv){
     gaussian_blur(&input, &output, rank, size);
     if(rank==0){
         end = MPI_Wtime();
-        printf("Gaussian Blur Time: %fs\n", end-start);
-
+        printf("Gaussian Blur Time: %.10fs\n", end-start);
+        totalTime = totalTime + (end-start);
         //store the gaussian image 
         if (!save_pgm(gaussian_path, &output)) {
             printf("Failed to save gaussian blur image.\n");
@@ -607,8 +608,8 @@ int main (int argc, char** argv){
     median_filter(&input, &output, rank, size);
     if(rank==0){
         end = MPI_Wtime();
-        printf("Median Filter Time: %fs\n", end-start);
-
+        printf("Median Filter Time: %.10fs\n", end-start);
+        totalTime = totalTime + (end-start);
         // Store the median image 
         if (!save_pgm(median_path, &output)) {
             printf("Failed to save median filter image.\n");
@@ -628,8 +629,8 @@ int main (int argc, char** argv){
     sobel(&input, &output, rank, size);
     if(rank==0){
         end = MPI_Wtime();
-        printf("Sobel Filter Time: %fs\n", end-start);
-
+        printf("Sobel Filter Time: %.10fs\n", end-start);
+        totalTime = totalTime + (end-start);
         //store the sobel image
         if (!save_pgm(sobel_path, &output)) {
             printf("Failed to save image.\n");
@@ -637,6 +638,7 @@ int main (int argc, char** argv){
             free_image(&output);
             MPI_Abort(MPI_COMM_WORLD, 1);
         }
+        printf("Total Time Taken: %.10lfs\n", totalTime);
     }
 
     if(rank==0){

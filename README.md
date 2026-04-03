@@ -37,7 +37,7 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 
 ### Compile and RUN the OPENMP version
 
-    gcc -fopenmp openmp/openMP.c -o openMP/openMP -lm
+    gcc -fopenmp openMP/openMP.c -o openMP/openMP -lm
 
 #### Run on Different Threads
 
@@ -48,9 +48,9 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 
 #### Run on Different sizes
 
-    OMP_NUM_THREADS=4 ./openmp/openMP small
-    OMP_NUM_THREADS=4 ./openmp/openMP medium
-    OMP_NUM_THREADS=4 ./openmp/openMP large
+    OMP_NUM_THREADS=4 ./openMP/openMP small
+    OMP_NUM_THREADS=4 ./openMP/openMP medium
+    OMP_NUM_THREADS=4 ./openMP/openMP large
 
 ### Compile and RUN the MPI version
 
@@ -58,8 +58,9 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
     mpirun -np [numberOfProcesses] ./MPI/MPI image_size
 
     Ex:
-    mpirun -np 4 ./mpi/MPI small
-    mpirun -np 4 ./mpi/MPI small
+    mpirun -np 4 ./MPI/MPI small
+    mpirun -np 4 ./MPI/MPI medium
+    mpirun -np 4 ./MPI/MPI large
 
 ### Github Link :
 
