@@ -1,8 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <math.h>
 #include <omp.h>
 
@@ -368,7 +366,7 @@ void free_image(Image *img) {
 int main(int argc, char *argv[]){
     Image input = {0};
     Image output = {0};
-    struct timespec start, end;
+    double gTime, mTime, sTime;
 
     const char *image_size = "small";
 	
@@ -409,22 +407,19 @@ int main(int argc, char *argv[]){
     //allocate output once, same size as input
     init_image_like(&input, &output);
 
-    #pragma omp parallel default(none) shared(input, output, start, end, image_size, input_path, gaussian_path, median_path, sobel_path)
+    #pragma omp parallel default(none) shared(input, output, gTime, mTime, sTime, image_size, input_path, gaussian_path, median_path, sobel_path)
     {   
-        double totalTime = 0;
         
         //Gaussian Blur
         #pragma omp single
-        clock_gettime(CLOCK_MONOTONIC, &start);
+        gTime = omp_get_wtime();
 
         gaussian_blur(&input, &output);
 
         #pragma omp single
         {
-            clock_gettime(CLOCK_MONOTONIC, &end);
-            printf("Gaussian Blur Time: %.10lfs\n",
-                   (end.tv_sec-start.tv_sec) + (end.tv_nsec-start.tv_nsec)/1000000000.0);
-            totalTime = totalTime+(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0;
+            gTime = omp_get_wtime()-gTime;
+            printf("Gaussian Blur Time: %.10lfs\n", gTime);
             if (!save_pgm(gaussian_path, &output)) {
                 printf("Failed to save gaussian blur image.\n");
             }
@@ -434,16 +429,14 @@ int main(int argc, char *argv[]){
 
         //Median Filter
         #pragma omp single
-        clock_gettime(CLOCK_MONOTONIC, &start);
+        mTime = omp_get_wtime();
 
         median_filter(&input, &output);
 
         #pragma omp single
         {
-            clock_gettime(CLOCK_MONOTONIC, &end);
-            printf("Median Filter Time: %.10lfs\n",
-                   (end.tv_sec-start.tv_sec) + (end.tv_nsec-start.tv_nsec)/1000000000.0);
-            totalTime = totalTime+(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0;
+            mTime = omp_get_wtime()-mTime;
+            printf("Median Filter Time: %.10lfs\n", mTime);
             if (!save_pgm(median_path, &output)) {
                 printf("Failed to save median filter image.\n");
             }
@@ -453,23 +446,20 @@ int main(int argc, char *argv[]){
 
         //Sobel
         #pragma omp single
-        clock_gettime(CLOCK_MONOTONIC, &start);
+        sTime = omp_get_wtime();
 
         sobel(&input, &output);
 
         #pragma omp single
         {
-            clock_gettime(CLOCK_MONOTONIC, &end);
-            printf("Sobel Edge Detection Time: %.10lfs\n",
-                   (end.tv_sec-start.tv_sec) + (end.tv_nsec-start.tv_nsec)/1000000000.0);
-            totalTime = totalTime+(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0;
+            sTime = omp_get_wtime()-sTime;
+            printf("Sobel Edge Detection Time: %.10lfs\n", sTime);
             if (!save_pgm(sobel_path, &output)) {
                 printf("Failed to save image.\n");
             }
-            printf("Total Time Taken: %.10lfs\n", totalTime);
         }
     }
-
+    printf("Total Time Taken: %.10lfs\n", gTime+mTime+sTime);
     free_image(&input);
     free_image(&output);
     return 0;
