@@ -529,9 +529,41 @@ int main (int argc, char** argv){
     Image input = {0};
     Image output = {0};
 
+	const char *image_size = "small";
+
+    if (argc > 1) {
+        if (strcmp(argv[1], "small") == 0 ||
+            strcmp(argv[1], "medium") == 0 ||
+            strcmp(argv[1], "large") == 0) {
+            image_size = argv[1];
+        } else {
+            if (rank == 0) {
+                printf("Usage: %s [small|medium|large]\n", argv[0]);
+            }
+            MPI_Finalize();
+            return 1;
+        }
+    }
+    char input_path[256];
+    char gaussian_path[256];
+    char median_path[256];
+    char sobel_path[256];
+
+    snprintf(input_path, sizeof(input_path),
+             "images/%s/starter/source.pgm", image_size);
+
+    snprintf(gaussian_path, sizeof(gaussian_path),
+             "images/%s/result/mpi/gaussian.pgm", image_size);
+
+    snprintf(median_path, sizeof(median_path),
+             "images/%s/result/mpi/median.pgm", image_size);
+
+    snprintf(sobel_path, sizeof(sobel_path),
+             "images/%s/result/mpi/sobel.pgm", image_size);
+
     if(rank==0){
         //load the image
-        if (!load_pgm("Images/small/starter/source.pgm",&input)){
+        if (!load_pgm(input_path, &input)){
             printf("Couldn't load the image\n");
             MPI_Abort(MPI_COMM_WORLD, 1);
         }
@@ -559,7 +591,7 @@ int main (int argc, char** argv){
         printf("Gaussian Blur Time: %fs\n", end-start);
 
         //store the gaussian image 
-        if (!save_pgm("Images/small/result/mpi/gaussian.pgm", &output)) {
+        if (!save_pgm(gaussian_path, &output)) {
             printf("Failed to save gaussian blur image.\n");
             free_image(&input);
             free_image(&output);
@@ -578,7 +610,7 @@ int main (int argc, char** argv){
         printf("Median Filter Time: %fs\n", end-start);
 
         // Store the median image 
-        if (!save_pgm("Images/small/result/mpi/median.pgm", &output)) {
+        if (!save_pgm(median_path, &output)) {
             printf("Failed to save median filter image.\n");
             free_image(&input);
             free_image(&output);
@@ -599,7 +631,7 @@ int main (int argc, char** argv){
         printf("Sobel Filter Time: %fs\n", end-start);
 
         //store the sobel image
-        if (!save_pgm("Images/small/result/mpi/sobel.pgm", &output)) {
+        if (!save_pgm(sobel_path, &output)) {
             printf("Failed to save image.\n");
             free_image(&input);
             free_image(&output);

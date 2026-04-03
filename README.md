@@ -24,9 +24,9 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 
 ### Create folders
 
-    mkdir -p images/small/result/serial images/small/result/openmp
-    mkdir -p images/medium/result/serial images/medium/result/openmp
-    mkdir -p images/large/result/serial images/large/result/openmp
+    mkdir -p images/small/result/serial images/small/result/openmp images/small/result/mpi
+    mkdir -p images/medium/result/serial images/medium/result/openmp images/medium/result/mpi
+    mkdir -p images/large/result/serial images/large/result/openmp images/large/result/mpi
 
 ### Compile and Run
 
@@ -34,10 +34,6 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
     ./serial/serial_baseline small
     ./serial/serial_baseline medium
     ./serial/serial_baseline large
-
-### Github Link :
-
-    https://github.com/Pax-02/Parallel_image_processing.git
 
 ### Compile and RUN the OPENMP version
 
@@ -59,6 +55,12 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 ### Compile and RUN the MPI version
 
     mpicc MPI/MPI.c -o MPI/MPI -lm
-    mpirun -np [numberOfProcesses] ./MPI/MPI
+    mpirun -np [numberOfProcesses] ./MPI/MPI image_size
 
-###
+    Ex:
+    mpirun -np 4 ./mpi/MPI small
+    mpirun -np 4 ./mpi/MPI small
+
+### Github Link :
+
+    https://github.com/Pax-02/Parallel_image_processing.git
