@@ -25,8 +25,9 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 Compile and Run
 
     gcc serial/serial_baseline.c -o serial/serial_baseline -lm
-
-    ./serial/serial_baseline
+    ./serial/serial_baseline small
+    ./serial/serial_baseline medium
+    ./serial/serial_baseline large
 
 ### Github Link :
 
@@ -44,5 +45,6 @@ Compile and Run
     OMP_NUM_THREADS=8 ./openMP/openMP
 
 ### Compile and RUN the MPI version
+
     mpicc MPI/MPI.c -o MPI/MPI -lm
     mpirun -np [numberOfProcesses] ./MPI/MPI

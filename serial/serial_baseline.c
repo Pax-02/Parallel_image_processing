@@ -365,13 +365,44 @@ void free_image(Image *img) {
     img->data = NULL;
 }
 
-int main (){
+int main (int argc, char *argv[]){
     Image input = {0};
     Image output = {0};
     struct timespec start, end;
 
-    //load the image
-    if (!load_pgm("images/small/starter/source.pgm",&input)){
+    const char *image_size = "small";
+
+    if (argc > 1) {
+        if (strcmp(argv[1], "small") == 0 ||
+            strcmp(argv[1], "medium") == 0 ||
+            strcmp(argv[1], "large") == 0) {
+            image_size = argv[1];
+        } else {
+            printf("Usage: %s [small|medium|large]\n", argv[0]);
+            return 1;
+        }
+    }
+
+
+    char input_path[256];
+    char gaussian_path[256];
+    char median_path[256];
+    char sobel_path[256];
+
+    snprintf(input_path, sizeof(input_path),
+             "images/%s/starter/source.pgm", image_size);
+
+    snprintf(gaussian_path, sizeof(gaussian_path),
+             "images/%s/result/serial/gaussian.pgm", image_size);
+
+    snprintf(median_path, sizeof(median_path),
+             "images/%s/result/serial/median.pgm", image_size);
+
+    snprintf(sobel_path, sizeof(sobel_path),
+             "images/%s/result/serial/sobel.pgm", image_size);
+    
+     //load the image
+    if (!load_pgm(input_path, &input)){
         printf("Couldn't load the image\n");
         return 1;
     }
@@ -385,7 +416,7 @@ int main (){
     clock_gettime(CLOCK_MONOTONIC,&end);
     printf("Gaussian Blur Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
     //store the gausian image 
-    if (!save_pgm("images/small/result/serial/gaussian.pgm", &output)) {
+    if (!save_pgm(gaussian_path, &output)) {
         printf("Failed to save gaussian blur image.\n");
         free_image(&input);
         free_image(&output);
@@ -400,7 +431,7 @@ int main (){
     printf("Median Filter Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
 
     // Store the median image 
-    if (!save_pgm("images/small/result/serial/median.pgm", &output)) {
+    if (!save_pgm(median_path, &output)) {
         printf("Failed to save median filter image.\n");
         free_image(&input);
         free_image(&output);
@@ -414,7 +445,7 @@ int main (){
     clock_gettime(CLOCK_MONOTONIC,&end);
     printf("Sobel Edge Detection Time: %.10lfs\n",(end.tv_sec-start.tv_sec)+(end.tv_nsec-start.tv_nsec)/1000000000.0);
 
-    if (!save_pgm("images/small/result/serial/sobel.pgm", &output)) {
+    if (!save_pgm(sobel_path, &output)) {
         printf("Failed to save image.\n");
         free_image(&input);
         free_image(&output);
