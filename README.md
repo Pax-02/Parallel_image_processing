@@ -22,7 +22,13 @@ For this project, images must be in PGM (Portable GrayMap) Specifically P2 forma
 
 ## Second Step
 
-Compile and Run
+### Create folders
+
+    mkdir -p images/small/result/serial images/small/result/openmp
+    mkdir -p images/medium/result/serial images/medium/result/openmp
+    mkdir -p images/large/result/serial images/large/result/openmp
+
+### Compile and Run
 
     gcc serial/serial_baseline.c -o serial/serial_baseline -lm
     ./serial/serial_baseline small
@@ -39,12 +45,20 @@ Compile and Run
 
 #### Run on Different Threads
 
-    OMP_NUM_THREADS=1 ./openMP/openMP
-    OMP_NUM_THREADS=2 ./openMP/openMP
-    OMP_NUM_THREADS=4 ./openMP/openMP
-    OMP_NUM_THREADS=8 ./openMP/openMP
+    OMP_NUM_THREADS=1 ./openMP/openMP small
+    OMP_NUM_THREADS=2 ./openMP/openMP small
+    OMP_NUM_THREADS=4 ./openMP/openMP small
+    OMP_NUM_THREADS=8 ./openMP/openMP small
+
+#### Run on Different sizes
+
+    OMP_NUM_THREADS=4 ./openmp/openMP small
+    OMP_NUM_THREADS=4 ./openmp/openMP medium
+    OMP_NUM_THREADS=4 ./openmp/openMP large
 
 ### Compile and RUN the MPI version
 
     mpicc MPI/MPI.c -o MPI/MPI -lm
     mpirun -np [numberOfProcesses] ./MPI/MPI
+
+###
